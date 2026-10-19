@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from . import __version__
 from .adapters import create_adapter, load_specs
 from .data import digest, load_corpus
+from .domains import domain_table, load_domain, load_domain_specs
 from .drafts import build_drafts
 from .metrics import compare
 from .report import chart_svg, leaderboard, write_reports
@@ -114,6 +115,91 @@ def refresh_leaderboard(
         typer.echo(f"{readme} leaderboard matches {report}")
         return
     readme.write_text(before + begin + "\n" + table + end + after, encoding="utf-8")
+    typer.echo(f"Updated {readme}")
+
+
+def replace_block(text: str, name: str, block: str) -> tuple[str, str]:
+    """Return (current block, text with the block replaced) between name markers."""
+    begin, end = f"<!-- {name}:start -->", f"<!-- {name}:end -->"
+    if text.count(begin) != 1 or text.count(end) != 1 or text.index(begin) > text.index(end):
+        raise typer.BadParameter(f"README must contain one ordered pair of {name} markers")
+    before, rest = text.split(begin, 1)
+    current, after = rest.split(end, 1)
+    return current, before + begin + "\n" + block + end + after
+
+
+@app.command()
+def domains(
+    tokenizer_lock: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path(
+        "configs/tokenizers.lock.json"
+    ),
+    domain_lock: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path(
+        "configs/domains.lock.json"
+    ),
+    cache: Annotated[Path, typer.Option(file_okay=False)] = Path(".cache"),
+    out: Annotated[Path, typer.Option(dir_okay=False)] = Path("benchmarks/domains.json"),
+    context_tokens: Annotated[int, typer.Option(min=1)] = 8192,
+    offline: Annotated[bool, typer.Option(help="Use verified cache only; never download.")] = False,
+):
+    """Measure every locked tokenizer on each licensed domain subset."""
+    try:
+        tokenizers = [
+            (spec, create_adapter(spec, cache, offline)) for spec in load_specs(tokenizer_lock)
+        ]
+        results = []
+        for spec in load_domain_specs(domain_lock):
+            pairs, stats = load_domain(spec, cache, offline)
+            results.append(
+                {
+                    **spec.model_dump(include={"name", "domain", "license", "source"}),
+                    "attribution": spec.attribution,
+                    "stats": stats,
+                    "tokenizers": [
+                        {"name": t.name, **compare(pairs, adapter, context_tokens)}
+                        for t, adapter in tokenizers
+                    ],
+                }
+            )
+    except (ValueError, OSError, KeyError, ImportError) as error:
+        typer.echo(f"Domain benchmark failed: {error}", err=True)
+        raise typer.Exit(1) from error
+    report = {
+        "schema_version": 1,
+        "version": __version__,
+        "tokenizer_lock_sha256": digest(tokenizer_lock.read_bytes()),
+        "domain_lock_sha256": digest(domain_lock.read_bytes()),
+        "context_tokens": context_tokens,
+        "domains": results,
+    }
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    typer.echo(f"Measured {len(results)} domains with {len(tokenizers)} tokenizers: {out}")
+
+
+@app.command("domain-table")
+def refresh_domain_table(
+    report: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path(
+        "benchmarks/domains.json"
+    ),
+    readme: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path("README.md"),
+    check: Annotated[
+        bool, typer.Option(help="Fail if the README table is stale; change nothing.")
+    ] = False,
+):
+    """Write (or check) the per-domain table between README domains markers."""
+    table = domain_table(json.loads(report.read_text(encoding="utf-8")))
+    current, updated = replace_block(readme.read_text(encoding="utf-8"), "domains", table)
+    if check:
+        if current.replace("\r\n", "\n").strip() != table.strip():
+            typer.echo(f"{readme} domain table is out of date; run ttt domain-table", err=True)
+            raise typer.Exit(1)
+        typer.echo(f"{readme} domain table matches {report}")
+        return
+    readme.write_text(updated, encoding="utf-8")
     typer.echo(f"Updated {readme}")
 
 
