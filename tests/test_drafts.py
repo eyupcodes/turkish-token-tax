@@ -77,6 +77,10 @@ def test_space_files_are_static_and_escaped(tmp_path) -> None:
 
     assert readme.startswith("---\ntitle: Turkish Token Tax\n")
     assert "sdk: static" in readme
+    # The Hub rejects emoji that are not a single Extended_Pictographic code point,
+    # such as flags made of two regional indicators.
+    emoji = next(line for line in readme.splitlines() if line.startswith("emoji: "))[7:]
+    assert len(emoji) == 1 and not 0x1F1E6 <= ord(emoji) <= 0x1F1FF
     assert "heavy&lt;b&gt;" in index and "heavy<b>" not in index
 
 
