@@ -1,7 +1,8 @@
 # Turkish Token Tax
 
 Reproducible Turkish–English tokenizer efficiency measurements. Python 3.11+.
-Private development; no package, dataset or Space publication is automated.
+Status: early release. No package is on PyPI yet, and the Kaggle and Hugging Face
+drafts in `drafts/` are reviewed by hand before anything is uploaded.
 
 ## Development
 
