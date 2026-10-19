@@ -1,0 +1,6 @@
+tokenizer,model,revision,tr_en_token_ratio,tr_tokens_per_word,en_tokens_per_word,tr_characters_per_token,en_characters_per_token,tr_tokens,en_tokens
+berturk,dbmdz/bert-base-turkish-cased,b6e1de16c983e0f2c70664591ea3f22810072608,0.580932,1.561645,2.161362,4.937561,2.787857,27499,47336
+xlm-r,FacebookAI/xlm-roberta-base,e73636d4f797dec63c3081bb6ed5c7b0bb3f2089,1.039170,1.809416,1.399982,4.261440,4.304034,31862,30661
+o200k_base,openai/tiktoken:o200k_base,0.14.0,1.431102,2.183997,1.227022,3.530553,4.910728,38458,26873
+qwen2.5,Qwen/Qwen2.5-0.5B,060db6499f32faf8b98477b0a26969ef7d8b9987,1.624235,2.547731,1.261175,3.026503,4.777742,44863,27621
+cl100k_base,openai/tiktoken:cl100k_base,0.14.0,1.921198,2.965643,1.241131,2.600015,4.854904,52222,27182

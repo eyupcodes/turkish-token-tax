@@ -54,6 +54,10 @@ See [METHOD.md](METHOD.md) for denominators, limitations and diagnostics, and
 [CONTRIBUTING.md](CONTRIBUTING.md) for adding a tokenizer. Llama, Gemma, Mistral,
 Qwen3, mT5 and domain subsets have not been measured. No API-price comparison is made.
 
+## Publication drafts
+
+`ttt drafts` writes a private Kaggle dataset and a static Hugging Face Space to `drafts/`. They contain aggregate numbers only, never corpus text, and carry the CC-BY-SA-4.0 data license with FLORES-200 attribution. `drafts/MANIFEST.json` records each file's SHA-256 and the lock hashes behind it. Nothing is uploaded automatically: publishing is a separate, explicitly approved step.
+
 ## Data
 
 The default is the complete 1,012-pair FLORES-200 Turkish/English devtest split.

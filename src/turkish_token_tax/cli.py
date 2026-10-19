@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from . import __version__
 from .adapters import create_adapter, load_specs
 from .data import digest, load_corpus
+from .drafts import build_drafts
 from .metrics import compare
 from .report import leaderboard, write_reports
 
@@ -104,6 +105,19 @@ def refresh_leaderboard(
     _, after = rest.split(end, 1)
     readme.write_text(before + begin + "\n" + table + end + after, encoding="utf-8")
     typer.echo(f"Updated {readme}")
+
+
+@app.command()
+def drafts(
+    report: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path(
+        "benchmarks/flores200-devtest.json"
+    ),
+    out: Annotated[Path, typer.Option(file_okay=False)] = Path("drafts"),
+):
+    """Write local Kaggle dataset and Hugging Face Space drafts. Publishes nothing."""
+    manifest = build_drafts(json.loads(report.read_text(encoding="utf-8")), out)
+    typer.echo(f"Wrote {len(manifest['files'])} draft files and MANIFEST.json to {out}")
+    typer.echo("Nothing was published; uploads need explicit approval.")
 
 
 @app.command()
