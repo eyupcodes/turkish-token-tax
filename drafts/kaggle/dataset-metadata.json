@@ -1,0 +1,29 @@
+{
+  "title": "Turkish Token Tax: tokenizer efficiency TR vs EN",
+  "id": "eypfidan/turkish-token-tax",
+  "subtitle": "How many more tokens Turkish needs than English, per tokenizer",
+  "description": "Aggregate token counts for Turkish and English on the 1012-pair FLORES-200 devtest split, measured with pinned tokenizer revisions. The TR/EN ratio is the 'token tax'. Derived from FLORES-200 devtest (NLLB Team, 2022, https://github.com/facebookresearch/flores), licensed CC-BY-SA-4.0. Only aggregate token counts are included; no corpus text.",
+  "licenses": [
+    {
+      "name": "CC-BY-SA-4.0"
+    }
+  ],
+  "keywords": [
+    "nlp",
+    "turkish",
+    "tokenization",
+    "benchmark",
+    "llm"
+  ],
+  "resources": [
+    {
+      "path": "leaderboard.csv",
+      "description": "One row per tokenizer."
+    },
+    {
+      "path": "benchmark.json",
+      "description": "Full report with locks."
+    }
+  ],
+  "isPrivate": true
+}
