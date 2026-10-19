@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "turkish-token-tax"
+version = "0.1.0"
+description = "Reproducible Turkish–English tokenizer efficiency measurements"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["typer==0.27.3", "pydantic==2.14.1", "PyYAML==6.0.3"]
+
+[project.optional-dependencies]
+tokenizers = ["tiktoken==0.14.0", "tokenizers==0.23.3"]
+dev = ["pytest==9.1.1", "pytest-cov==7.1.0", "ruff==0.17.1", "build==1.6.1"]
+
+[project.scripts]
+ttt = "turkish_token_tax.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/turkish_token_tax"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=turkish_token_tax --cov-branch --cov-report=term-missing --cov-fail-under=90"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
