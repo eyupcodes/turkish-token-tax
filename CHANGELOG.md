@@ -7,3 +7,4 @@
 - Deterministic CLI, JSON/Markdown/HTML reports, ratio chart and generated README leaderboard.
 - Explicit diagnostic availability, isolated-word fragmentation and context-density estimates.
 - `ttt drafts`: local Kaggle dataset and HF Space drafts with a hashed provenance manifest; nothing is published.
+- `ttt chart` draws the TR/EN ratio as an SVG; `ttt leaderboard --check` fails CI when the README table is stale (#4).

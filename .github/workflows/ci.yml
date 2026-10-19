@@ -23,4 +23,8 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: python -m pytest
+      - name: README leaderboard matches the committed benchmark
+        run: ttt leaderboard --report benchmarks/flores200-devtest.json --check
+      - name: Committed chart matches the committed benchmark
+        run: ttt chart && git diff --exit-code benchmarks/flores200-devtest.svg
       - run: python -m build
