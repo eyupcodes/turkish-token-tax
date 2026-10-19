@@ -1,0 +1,53 @@
+[
+  {
+    "name": "globalvoices-news",
+    "domain": "news",
+    "license": "CC-BY-3.0",
+    "source": "https://globalvoices.org/about/global-voices-attribution-policy/",
+    "attribution": "Global Voices (CC BY), compiled by CASMACAT; distributed by OPUS (Tiedemann, 2012), release 2018Q4.",
+    "archive": {
+      "url": "https://object.pouta.csc.fi/OPUS-GlobalVoices/v2018q4/moses/en-tr.txt.zip",
+      "sha256": "60f77d367e71124e5bf1b75fe1fd62633713f31e868e5d15312dd048a09c197c"
+    },
+    "tr_member": "GlobalVoices.en-tr.tr",
+    "en_member": "GlobalVoices.en-tr.en",
+    "tr_sha256": "2b5093ce912bc4a13e59afd5b00c12815aec9c2d52c1165e884254f267a7e2f4",
+    "en_sha256": "c8484cdde0b30011395a61dd9c2ea9a87ab7f536982362372531131b912a8e4c",
+    "pairs": 7838,
+    "sample_size": 2000
+  },
+  {
+    "name": "tldr-pages-technical",
+    "domain": "technical",
+    "license": "CC-BY-4.0",
+    "source": "https://github.com/tldr-pages/tldr",
+    "attribution": "tldr-pages team and contributors (CC BY 4.0); distributed by OPUS (Tiedemann, 2012), release v2026-07-07.",
+    "archive": {
+      "url": "https://object.pouta.csc.fi/OPUS-tldr-pages/v2026-07-07/moses/en-tr.txt.zip",
+      "sha256": "5dbd00eb1147b888b6160e895f08962cff92effb57bef3ff19846741fdf08f97"
+    },
+    "tr_member": "tldr-pages.en-tr.tr",
+    "en_member": "tldr-pages.en-tr.en",
+    "tr_sha256": "eb82e3f81fd3b60fa475f5bc215572550b09136348fc01cef0988bd8ea322a22",
+    "en_sha256": "de99383e5a9e70e30f8d6a124a76f2898543c1c36b5081b68bfb9d76c95891e5",
+    "pairs": 4836,
+    "sample_size": 2000
+  },
+  {
+    "name": "tatoeba-conversation",
+    "domain": "conversation",
+    "license": "CC-BY-2.0-FR",
+    "source": "https://tatoeba.org/eng/terms_of_use",
+    "attribution": "Tatoeba contributors (CC BY 2.0 FR); distributed by OPUS (Tiedemann, 2012), release v2026-07-08.",
+    "archive": {
+      "url": "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-tr.txt.zip",
+      "sha256": "1ae52723329af00bf5a4ef7b1aea68d831202309cbd765162901f7fc9418d89c"
+    },
+    "tr_member": "Tatoeba.en-tr.tr",
+    "en_member": "Tatoeba.en-tr.en",
+    "tr_sha256": "29b8890829280793654a537651a2796017c65f54b8fe904c999e26de34e73669",
+    "en_sha256": "45cef29bcbba3cde7de7bafda530eba66c0cdea9bb15cff268a7ddfb6080e445",
+    "pairs": 686483,
+    "sample_size": 2000
+  }
+]
