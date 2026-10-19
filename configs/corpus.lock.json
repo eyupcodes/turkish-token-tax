@@ -1,0 +1,14 @@
+{
+  "name": "flores200-devtest-tur-eng",
+  "license": "CC-BY-SA-4.0",
+  "source": "https://github.com/facebookresearch/flores/tree/main/flores200",
+  "archive": {
+    "url": "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz",
+    "sha256": "b8b0b76783024b85797e5cc75064eb83fc5288b41e9654dabc7be6ae944011f6"
+  },
+  "tr_member": "./flores200_dataset/devtest/tur_Latn.devtest",
+  "en_member": "./flores200_dataset/devtest/eng_Latn.devtest",
+  "tr_sha256": "c0fe28cee25f77fbe8471bcd3c87d26c7a284f4f0420f4293c9ce004b9bef8f2",
+  "en_sha256": "612e9fbe87997617c0fa8fa8929654a4f49b728d96738112c2b86ef6a1d78d88",
+  "pairs": 1012
+}
