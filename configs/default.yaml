@@ -1,0 +1,5 @@
+corpus_lock: corpus.lock.json
+tokenizer_lock: tokenizers.lock.json
+cache: ../.cache
+output: ../results
+context_tokens: 8192
