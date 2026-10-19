@@ -50,6 +50,15 @@ timestamps nor machine paths. Repeated runs with the same environment/inputs
 produce identical JSON, Markdown and HTML bytes; the unit suite verifies this on
 a fixture, and the real default run is checked separately.
 
+## Domain subsets
+
+`ttt domains` applies the same counting to each subset in
+`configs/domains.lock.json`: verified download, blank and duplicate pairs
+removed, then the first `sample_size` pairs by SHA-256 of `tr + TAB + en`.
+The per-domain ratio is again sum(TR tokens) / sum(EN tokens). Subsets differ in
+size, sentence length and source, so a ratio is comparable across tokenizers
+within one domain, not across domains or against the FLORES-200 table.
+
 ## Interpretation and limits
 
 BERTurk and XLM-R are encoder references. A Turkish-specific tokenizer can obtain
