@@ -1,0 +1,22 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='640' height='286' viewBox='0 0 640 286' font-family='system-ui,sans-serif' role='img' aria-label='Turkish to English token ratio by tokenizer'>
+<title>Turkish / English token ratio by tokenizer</title>
+<text x='16' y='26' font-size='17' font-weight='700' fill='#58A6FF'>Turkish / English token ratio</text>
+<text x='16' y='44' font-size='12' fill='#8B949E'>flores200-devtest-tur-eng, 1012 pairs. Lower means cheaper Turkish.</text>
+<text x='120' y='74' font-size='13' text-anchor='end' fill='#8B949E'>berturk</text>
+<rect x='130' y='56' width='121.0' height='26' rx='4' fill='#3FB950'/>
+<text x='259.0' y='74' font-size='13' font-weight='600' fill='#8B949E'>0.58×</text>
+<text x='120' y='112' font-size='13' text-anchor='end' fill='#8B949E'>xlm-r</text>
+<rect x='130' y='94' width='216.4' height='26' rx='4' fill='#D29922'/>
+<text x='354.4' y='112' font-size='13' font-weight='600' fill='#8B949E'>1.04×</text>
+<text x='120' y='150' font-size='13' text-anchor='end' fill='#8B949E'>o200k_base</text>
+<rect x='130' y='132' width='298.0' height='26' rx='4' fill='#D29922'/>
+<text x='436.0' y='150' font-size='13' font-weight='600' fill='#8B949E'>1.43×</text>
+<text x='120' y='188' font-size='13' text-anchor='end' fill='#8B949E'>qwen2.5</text>
+<rect x='130' y='170' width='338.2' height='26' rx='4' fill='#F85149'/>
+<text x='476.2' y='188' font-size='13' font-weight='600' fill='#8B949E'>1.62×</text>
+<text x='120' y='226' font-size='13' text-anchor='end' fill='#8B949E'>cl100k_base</text>
+<rect x='130' y='208' width='400.0' height='26' rx='4' fill='#F85149'/>
+<text x='538.0' y='226' font-size='13' font-weight='600' fill='#8B949E'>1.92×</text>
+<line x1='338.2' y1='50' x2='338.2' y2='256' stroke='#8B949E' stroke-dasharray='4 4'/>
+<text x='338.2' y='272' font-size='11' text-anchor='middle' fill='#8B949E'>parity (1.0)</text>
+</svg>
