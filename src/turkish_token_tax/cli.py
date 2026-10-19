@@ -14,7 +14,7 @@ from .adapters import create_adapter, load_specs
 from .data import digest, load_corpus
 from .drafts import build_drafts
 from .metrics import compare
-from .report import leaderboard, write_reports
+from .report import chart_svg, leaderboard, write_reports
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -92,6 +92,9 @@ def run(
 def refresh_leaderboard(
     report: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     readme: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path("README.md"),
+    check: Annotated[
+        bool, typer.Option(help="Fail if the README table is stale; change nothing.")
+    ] = False,
 ):
     """Replace only the generated leaderboard block in a README."""
     begin = "<!-- leaderboard:start -->"
@@ -102,9 +105,32 @@ def refresh_leaderboard(
     data = json.loads(report.read_text(encoding="utf-8"))
     table = leaderboard(data)
     before, rest = text.split(begin, 1)
-    _, after = rest.split(end, 1)
+    current, after = rest.split(end, 1)
+    if check:
+        # Compare without line-ending noise so a Windows checkout agrees with CI.
+        if current.replace("\r\n", "\n").strip() != table.strip():
+            typer.echo(f"{readme} leaderboard is out of date; run ttt leaderboard", err=True)
+            raise typer.Exit(1)
+        typer.echo(f"{readme} leaderboard matches {report}")
+        return
     readme.write_text(before + begin + "\n" + table + end + after, encoding="utf-8")
     typer.echo(f"Updated {readme}")
+
+
+@app.command()
+def chart(
+    report: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path(
+        "benchmarks/flores200-devtest.json"
+    ),
+    out: Annotated[Path, typer.Option(dir_okay=False)] = Path("benchmarks/flores200-devtest.svg"),
+):
+    """Draw the TR/EN ratio chart (SVG) from a saved report."""
+    out.write_text(
+        chart_svg(json.loads(report.read_text(encoding="utf-8"))),
+        encoding="utf-8",
+        newline="\n",
+    )
+    typer.echo(f"Wrote {out}")
 
 
 @app.command()
