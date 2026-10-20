@@ -9,3 +9,4 @@
 - `ttt drafts`: local Kaggle dataset and HF Space drafts with a hashed provenance manifest; nothing is published.
 - `ttt chart` draws the TR/EN ratio as an SVG; `ttt leaderboard --check` fails CI when the README table is stale (#4).
 - Licensed domain subsets (news: Global Voices, technical: tldr-pages, conversation: Tatoeba) with `ttt domains` and a checked README table; no legal subset for lack of an openly licensed source (#5).
+- Verified downloads are written to the cache atomically, so an interrupted write cannot leave a corrupt cache entry (#17).
