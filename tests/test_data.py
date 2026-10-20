@@ -95,6 +95,25 @@ def test_verified_download(tmp_path, monkeypatch):
         fetch(Artifact(url=artifact.url, sha256="0" * 64), tmp_path)
 
 
+def test_interrupted_write_leaves_no_cache_entry(tmp_path, monkeypatch):
+    data = b"fixture"
+    artifact = Artifact(url="https://example.org/a", sha256=digest(data))
+    monkeypatch.setattr("urllib.request.urlopen", lambda *a, **kw: closing(io.BytesIO(data)))
+
+    def fail(source, target):
+        raise OSError("disk full")
+
+    monkeypatch.setattr("os.replace", fail)
+    with pytest.raises(OSError, match="disk full"):
+        fetch(artifact, tmp_path)
+    assert list(tmp_path.iterdir()) == []
+
+    monkeypatch.undo()
+    monkeypatch.setattr("urllib.request.urlopen", lambda *a, **kw: closing(io.BytesIO(data)))
+    assert fetch(artifact, tmp_path).read_bytes() == data
+    assert [p.name for p in tmp_path.iterdir()] == [artifact.sha256]
+
+
 def test_schema_rejects_unpinned_source():
     with pytest.raises(ValidationError):
         Artifact(url="http://example.org", sha256="main")

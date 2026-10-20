@@ -2,7 +2,9 @@
 
 import hashlib
 import json
+import os
 import tarfile
+import tempfile
 import urllib.request
 from pathlib import Path
 
@@ -45,8 +47,20 @@ def fetch(artifact: Artifact, cache: Path, offline: bool = False) -> Path:
     if len(data) > 100_000_000 or digest(data) != artifact.sha256:
         raise ValueError(f"Download integrity check failed: {artifact.url}")
     cache.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
+    _write_atomic(path, data)
     return path
+
+
+def _write_atomic(path: Path, data: bytes) -> None:
+    """Never leave a partial file under the digest name."""
+    handle, temporary = tempfile.mkstemp(dir=path.parent, prefix=".download-")
+    try:
+        with os.fdopen(handle, "wb") as stream:
+            stream.write(data)
+        os.replace(temporary, path)
+    except BaseException:
+        Path(temporary).unlink(missing_ok=True)
+        raise
 
 
 def load_corpus(lock: Path, cache: Path, offline: bool = False) -> tuple[Corpus, list[dict]]:
