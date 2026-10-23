@@ -2,6 +2,8 @@
 
 import importlib.metadata
 import json
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Annotated
 
@@ -69,6 +71,22 @@ def run_benchmark(config: Path, offline: bool = False) -> tuple[dict, Path]:
     return report, base / settings.output
 
 
+@contextmanager
+def report_errors(report: Path) -> Iterator[None]:
+    """Turn an unreadable or malformed saved report into a one-line error, exit 1."""
+    try:
+        yield
+    except (ValueError, OSError, KeyError, TypeError, IndexError) as error:
+        detail = f"missing key {error}" if isinstance(error, KeyError) else str(error)
+        typer.echo(f"error: {report}: not a usable report ({detail})", err=True)
+        raise typer.Exit(1) from error
+
+
+def render_report(report: Path, render: Callable[[dict], str]) -> str:
+    with report_errors(report):
+        return render(json.loads(report.read_text(encoding="utf-8")))
+
+
 @app.command()
 def run(
     config: Annotated[Path, typer.Option(exists=True, dir_okay=False)] = Path(
@@ -103,8 +121,7 @@ def refresh_leaderboard(
     text = readme.read_text(encoding="utf-8")
     if text.count(begin) != 1 or text.count(end) != 1 or text.index(begin) > text.index(end):
         raise typer.BadParameter("README must contain one ordered pair of leaderboard markers")
-    data = json.loads(report.read_text(encoding="utf-8"))
-    table = leaderboard(data)
+    table = render_report(report, leaderboard)
     before, rest = text.split(begin, 1)
     current, after = rest.split(end, 1)
     if check:
@@ -191,7 +208,7 @@ def refresh_domain_table(
     ] = False,
 ):
     """Write (or check) the per-domain table between README domains markers."""
-    table = domain_table(json.loads(report.read_text(encoding="utf-8")))
+    table = render_report(report, domain_table)
     current, updated = replace_block(readme.read_text(encoding="utf-8"), "domains", table)
     if check:
         if current.replace("\r\n", "\n").strip() != table.strip():
@@ -211,11 +228,7 @@ def chart(
     out: Annotated[Path, typer.Option(dir_okay=False)] = Path("benchmarks/flores200-devtest.svg"),
 ):
     """Draw the TR/EN ratio chart (SVG) from a saved report."""
-    out.write_text(
-        chart_svg(json.loads(report.read_text(encoding="utf-8"))),
-        encoding="utf-8",
-        newline="\n",
-    )
+    out.write_text(render_report(report, chart_svg), encoding="utf-8", newline="\n")
     typer.echo(f"Wrote {out}")
 
 
