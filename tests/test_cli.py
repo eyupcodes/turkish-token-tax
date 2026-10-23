@@ -1,6 +1,7 @@
 import hashlib
 import json
 
+import pytest
 from test_adapters import spec_for
 from test_data import corpus_fixture
 from typer.testing import CliRunner
@@ -84,3 +85,22 @@ def test_generated_leaderboard_preserves_prose(tmp_path):
         )
         assert result.exit_code == 2
         assert readme.read_text() == invalid
+
+
+@pytest.mark.parametrize("command", ["leaderboard", "domain-table", "chart"])
+@pytest.mark.parametrize("content", ["{not json", "{}", "[]"])
+def test_invalid_report_is_a_one_line_error(tmp_path, command, content):
+    report = tmp_path / "report.json"
+    report.write_text(content, encoding="utf-8")
+    readme = tmp_path / "README.md"
+    readme.write_text("<!-- leaderboard:start --><!-- leaderboard:end -->\n")
+    args = [command, "--report", str(report)]
+    if command == "chart":
+        args += ["--out", str(tmp_path / "chart.svg")]
+    else:
+        args += ["--readme", str(readme)]
+    result = CliRunner().invoke(app, args)
+    assert result.exit_code == 1
+    assert f"error: {report}: not a usable report" in result.output
+    assert "Traceback" not in result.output
+    assert not (tmp_path / "chart.svg").exists()
