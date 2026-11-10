@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- CI runs `mypy` on `src` (`mypy` and `types-PyYAML` are in the `dev` extras); a tiktoken spec without a pinned regex now fails with a clear error instead of a failure inside tiktoken (#21).
 - Verified FLORES-200 devtest loading with immutable content digests and license attribution.
 - Five real tokenizer adapters, cached artifacts and immutable revision locks.
 - Deterministic CLI, JSON/Markdown/HTML reports, ratio chart and generated README leaderboard.
