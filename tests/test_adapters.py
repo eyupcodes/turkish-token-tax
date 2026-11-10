@@ -94,3 +94,17 @@ def test_unique_specs(tmp_path):
         path.write_text(json.dumps(values))
         with pytest.raises(ValueError, match="unique"):
             load_specs(path)
+
+
+def test_create_adapter_rejects_tiktoken_spec_without_pattern(tmp_path):
+    spec = TokenizerSpec.model_construct(
+        name="bytes",
+        kind="tiktoken",
+        model="fixture",
+        revision="0.14.0",
+        license="MIT",
+        pattern=None,
+        artifact=None,
+    )
+    with pytest.raises(ValueError, match="no pinned regex"):
+        create_adapter(spec, tmp_path, offline=True)

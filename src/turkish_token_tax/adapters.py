@@ -85,7 +85,14 @@ def load_specs(path: Path) -> list[TokenizerSpec]:
     return specs
 
 
+def _tiktoken_pattern(spec: TokenizerSpec) -> str:
+    if not spec.pattern:
+        raise ValueError(f"tiktoken spec {spec.name!r} has no pinned regex pattern")
+    return spec.pattern
+
+
 def create_adapter(spec: TokenizerSpec, cache: Path, offline: bool = False) -> Adapter:
+    pattern = _tiktoken_pattern(spec) if spec.kind == "tiktoken" else ""
     artifact = fetch(spec.artifact, cache, offline)
     if spec.kind == "tiktoken":
         import tiktoken
@@ -99,7 +106,7 @@ def create_adapter(spec: TokenizerSpec, cache: Path, offline: bool = False) -> A
         return TiktokenAdapter(
             tiktoken.Encoding(
                 name=spec.name,
-                pat_str=spec.pattern,
+                pat_str=pattern,
                 mergeable_ranks=ranks,
                 special_tokens={},
             )

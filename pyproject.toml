@@ -13,7 +13,7 @@ dependencies = ["typer==0.27.3", "pydantic==2.14.1", "PyYAML==6.0.3"]
 
 [project.optional-dependencies]
 tokenizers = ["tiktoken==0.14.0", "tokenizers==0.23.3"]
-dev = ["pytest==9.1.1", "pytest-cov==7.1.0", "ruff==0.17.1", "build==1.6.1"]
+dev = ["pytest==9.1.1", "pytest-cov==7.1.0", "ruff==0.17.1", "build==1.6.1", "mypy==2.4.1", "types-PyYAML==6.0.12.20260408"]
 
 [project.scripts]
 ttt = "turkish_token_tax.cli:app"
@@ -24,6 +24,13 @@ packages = ["src/turkish_token_tax"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--cov=turkish_token_tax --cov-branch --cov-report=term-missing --cov-fail-under=90"
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+warn_unused_ignores = true
+plugins = ["pydantic.mypy"]
+files = ["src"]
 
 [tool.ruff]
 line-length = 100
