@@ -104,3 +104,16 @@ def test_invalid_report_is_a_one_line_error(tmp_path, command, content):
     assert f"error: {report}: not a usable report" in result.output
     assert "Traceback" not in result.output
     assert not (tmp_path / "chart.svg").exists()
+
+
+def test_run_reports_invalid_yaml_config_without_a_traceback(tmp_path):
+    config = tmp_path / "config.yaml"
+    config.write_text("corpus_lock: [unclosed\n")
+
+    result = CliRunner().invoke(app, ["run", "--config", str(config), "--offline"])
+
+    assert result.exit_code == 1
+    assert "Benchmark failed" in result.output
+    assert "invalid YAML" in result.output
+    assert "Traceback" not in result.output
+    assert not (tmp_path / "results").exists()

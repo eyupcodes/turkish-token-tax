@@ -98,6 +98,9 @@ def run(
     try:
         report, output = run_benchmark(config, offline)
         write_reports(report, output)
+    except yaml.YAMLError as error:
+        typer.echo(f"Benchmark failed: {config}: invalid YAML ({error})", err=True)
+        raise typer.Exit(1) from error
     except (ValueError, OSError, KeyError, ImportError) as error:
         typer.echo(f"Benchmark failed: {error}", err=True)
         raise typer.Exit(1) from error
