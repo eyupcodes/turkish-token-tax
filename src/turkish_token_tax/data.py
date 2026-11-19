@@ -66,22 +66,28 @@ def _write_atomic(path: Path, data: bytes) -> None:
 def load_corpus(lock: Path, cache: Path, offline: bool = False) -> tuple[Corpus, list[dict]]:
     spec = Corpus.model_validate(json.loads(lock.read_text(encoding="utf-8")))
     archive = fetch(spec.archive, cache, offline)
-    with tarfile.open(archive, mode="r:gz") as bundle:
-        contents = []
-        for member, expected in [
-            (spec.tr_member, spec.tr_sha256),
-            (spec.en_member, spec.en_sha256),
-        ]:
-            stream = bundle.extractfile(member)
-            if stream is None:
-                raise ValueError(f"Not a corpus file: {member}")
-            data = stream.read()
-            if digest(data) != expected:
-                raise ValueError(f"Corpus member integrity check failed: {member}")
-            lines = data.decode("utf-8").splitlines()
-            if len(lines) != spec.pairs or any(not line.strip() for line in lines):
-                raise ValueError(f"Empty or misaligned corpus: {member}")
-            contents.append(lines)
+    try:
+        with tarfile.open(archive, mode="r:gz") as bundle:
+            contents = []
+            for member, expected in [
+                (spec.tr_member, spec.tr_sha256),
+                (spec.en_member, spec.en_sha256),
+            ]:
+                try:
+                    stream = bundle.extractfile(member)
+                except KeyError:
+                    raise ValueError(f"Not a corpus file: {member}") from None
+                if stream is None:
+                    raise ValueError(f"Not a corpus file: {member}")
+                data = stream.read()
+                if digest(data) != expected:
+                    raise ValueError(f"Corpus member integrity check failed: {member}")
+                lines = data.decode("utf-8").splitlines()
+                if len(lines) != spec.pairs or any(not line.strip() for line in lines):
+                    raise ValueError(f"Empty or misaligned corpus: {member}")
+                contents.append(lines)
+    except tarfile.TarError as error:
+        raise ValueError(f"Corpus archive is not a readable tar.gz: {error}") from error
     pairs = [
         {"id": str(i + 1), "tr": tr, "en": en}
         for i, (tr, en) in enumerate(zip(*contents, strict=True))

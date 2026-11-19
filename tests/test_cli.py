@@ -7,6 +7,7 @@ from test_data import corpus_fixture
 from typer.testing import CliRunner
 
 from turkish_token_tax.cli import app, run_benchmark
+from turkish_token_tax.data import digest
 from turkish_token_tax.report import write_reports
 
 
@@ -117,3 +118,37 @@ def test_run_reports_invalid_yaml_config_without_a_traceback(tmp_path):
     assert "invalid YAML" in result.output
     assert "Traceback" not in result.output
     assert not (tmp_path / "results").exists()
+
+
+def test_run_reports_unreadable_corpus_archive_without_a_traceback(tmp_path):
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    raw = b"definitely not a tar.gz"
+    (cache / digest(raw)).write_bytes(raw)
+    (tmp_path / "corpus.lock.json").write_text(
+        json.dumps(
+            {
+                "name": "fixture",
+                "license": "MIT",
+                "source": "https://example.org/source",
+                "archive": {"url": "https://example.org/data", "sha256": digest(raw)},
+                "tr_member": "tr",
+                "en_member": "en",
+                "tr_sha256": "0" * 64,
+                "en_sha256": "0" * 64,
+                "pairs": 1,
+            }
+        )
+    )
+    (tmp_path / "tokenizers.lock.json").write_text("[]")
+    config = tmp_path / "config.yaml"
+    config.write_text(
+        "corpus_lock: corpus.lock.json\ntokenizer_lock: tokenizers.lock.json\n"
+        "cache: cache\noutput: results\ncontext_tokens: 8192\n"
+    )
+
+    result = CliRunner().invoke(app, ["run", "--config", str(config), "--offline"])
+
+    assert result.exit_code == 1
+    assert "not a readable tar.gz" in result.output
+    assert "Traceback" not in result.output

@@ -83,6 +83,16 @@ def test_load_domain_verifies_digests_and_alignment(tmp_path) -> None:
         load_domain(DomainCorpus.model_validate({**spec, "tr_member": "x"}), cache, True)
 
 
+def test_load_domain_rejects_an_archive_that_is_not_a_zip(tmp_path) -> None:
+    spec, cache = domain_fixture(tmp_path)
+    raw = b"definitely not a zip"
+    (cache / digest(raw)).write_bytes(raw)
+    broken = {**spec, "archive": {**spec["archive"], "sha256": digest(raw)}}
+
+    with pytest.raises(ValueError, match="not a readable zip"):
+        load_domain(DomainCorpus.model_validate(broken), cache, offline=True)
+
+
 def test_domain_lock_validation(tmp_path) -> None:
     spec, _ = domain_fixture(tmp_path)
     lock = tmp_path / "domains.json"

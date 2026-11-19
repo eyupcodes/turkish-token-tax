@@ -77,6 +77,26 @@ def test_directory_member(tmp_path):
         load_corpus(lock, cache)
 
 
+def test_missing_member(tmp_path):
+    lock, cache = corpus_fixture(tmp_path)
+    spec = json.loads(lock.read_text())
+    spec["en_member"] = "nope"
+    lock.write_text(json.dumps(spec))
+    with pytest.raises(ValueError, match="Not a corpus file: nope"):
+        load_corpus(lock, cache)
+
+
+def test_archive_that_is_not_a_tarball(tmp_path):
+    lock, cache = corpus_fixture(tmp_path)
+    raw = b"definitely not a tar.gz"
+    (cache / digest(raw)).write_bytes(raw)
+    spec = json.loads(lock.read_text())
+    spec["archive"]["sha256"] = digest(raw)
+    lock.write_text(json.dumps(spec))
+    with pytest.raises(ValueError, match="not a readable tar.gz"):
+        load_corpus(lock, cache)
+
+
 def test_cache_integrity_and_offline(tmp_path):
     artifact = Artifact(url="https://example.org/a", sha256="0" * 64)
     with pytest.raises(FileNotFoundError, match="Missing offline"):
