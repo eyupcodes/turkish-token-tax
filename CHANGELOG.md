@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `ttt run` and `ttt domains` report a corpus archive that is not a readable tar.gz/zip, or a locked member missing from it, as a one-line `failed:` error (exit 1) instead of a traceback or a bare `KeyError` (#25).
 - `ttt run` reports a config file with invalid YAML as a one-line `Benchmark failed: ... invalid YAML` error (exit 1) instead of a traceback (#23).
 - CI runs `mypy` on `src` (`mypy` and `types-PyYAML` are in the `dev` extras); a tiktoken spec without a pinned regex now fails with a clear error instead of a failure inside tiktoken (#21).
 - Verified FLORES-200 devtest loading with immutable content digests and license attribution.

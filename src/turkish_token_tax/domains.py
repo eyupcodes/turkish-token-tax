@@ -110,7 +110,11 @@ def domain_table(report: dict) -> str:
 
 def load_domain(spec: DomainCorpus, cache: Path, offline: bool = False) -> tuple[list, dict]:
     archive = fetch(spec.archive, cache, offline)
-    with zipfile.ZipFile(io.BytesIO(archive.read_bytes())) as bundle:
+    try:
+        bundle = zipfile.ZipFile(io.BytesIO(archive.read_bytes()))
+    except zipfile.BadZipFile as error:
+        raise ValueError(f"Corpus archive is not a readable zip: {error}") from error
+    with bundle:
         tr = _read_member(bundle, spec.tr_member, spec.tr_sha256)
         en = _read_member(bundle, spec.en_member, spec.en_sha256)
     if len(tr) != spec.pairs or len(en) != spec.pairs:
