@@ -137,8 +137,8 @@ def space_index(report: dict) -> str:
     )
 
 
-def build_drafts(report: dict, out: Path) -> dict:
-    """Write every draft file and a manifest of their hashes; return the manifest."""
+def render_drafts(report: dict) -> tuple[dict[str, str], dict]:
+    """Render every draft file and its manifest without touching the disk."""
     benchmark = json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
     files = {
         "kaggle/dataset-metadata.json": json.dumps(
@@ -150,10 +150,6 @@ def build_drafts(report: dict, out: Path) -> dict:
         "hf-space/README.md": space_readme(report),
         "hf-space/index.html": space_index(report),
     }
-    for relative, text in files.items():
-        path = out / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8", newline="\n")
     manifest = {
         "status": "draft, not published",
         "targets": {"kaggle_dataset": DATASET_SLUG, "hf_space": SPACE_REPO},
@@ -167,7 +163,22 @@ def build_drafts(report: dict, out: Path) -> dict:
             for relative, text in sorted(files.items())
         },
     }
+    return files, manifest
+
+
+def write_drafts(files: dict[str, str], manifest: dict, out: Path) -> None:
+    """Write the rendered draft files, then the manifest of their hashes."""
+    for relative, text in files.items():
+        path = out / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8", newline="\n")
     (out / "MANIFEST.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
+
+
+def build_drafts(report: dict, out: Path) -> dict:
+    """Write every draft file and a manifest of their hashes; return the manifest."""
+    files, manifest = render_drafts(report)
+    write_drafts(files, manifest, out)
     return manifest
