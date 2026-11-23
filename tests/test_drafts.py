@@ -3,6 +3,7 @@ import hashlib
 import io
 import json
 
+import pytest
 from typer.testing import CliRunner
 
 from turkish_token_tax.cli import app
@@ -101,3 +102,17 @@ def test_cli_writes_drafts_and_says_nothing_was_published(tmp_path) -> None:
     assert result.exit_code == 0, result.output
     assert "Nothing was published" in result.output
     assert (out / "MANIFEST.json").exists()
+
+
+@pytest.mark.parametrize("content", ["{not json", "{}", "[]", json.dumps(REPORT | {"corpus": {}})])
+def test_cli_reports_an_unusable_report_without_writing_drafts(tmp_path, content) -> None:
+    report = tmp_path / "report.json"
+    report.write_text(content, encoding="utf-8")
+    out = tmp_path / "drafts"
+
+    result = CliRunner().invoke(app, ["drafts", "--report", str(report), "--out", str(out)])
+
+    assert result.exit_code == 1
+    assert f"error: {report}: not a usable report" in result.output
+    assert "Traceback" not in result.output
+    assert not out.exists()

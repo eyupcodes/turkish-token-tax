@@ -15,7 +15,7 @@ from . import __version__
 from .adapters import create_adapter, load_specs
 from .data import digest, load_corpus
 from .domains import domain_table, load_domain, load_domain_specs
-from .drafts import build_drafts
+from .drafts import render_drafts, write_drafts
 from .metrics import compare
 from .report import chart_svg, leaderboard, write_reports
 
@@ -243,7 +243,9 @@ def drafts(
     out: Annotated[Path, typer.Option(file_okay=False)] = Path("drafts"),
 ):
     """Write local Kaggle dataset and Hugging Face Space drafts. Publishes nothing."""
-    manifest = build_drafts(json.loads(report.read_text(encoding="utf-8")), out)
+    with report_errors(report):
+        files, manifest = render_drafts(json.loads(report.read_text(encoding="utf-8")))
+    write_drafts(files, manifest, out)
     typer.echo(f"Wrote {len(manifest['files'])} draft files and MANIFEST.json to {out}")
     typer.echo("Nothing was published; uploads need explicit approval.")
 
