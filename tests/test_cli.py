@@ -1,9 +1,11 @@
 import hashlib
 import json
+import pathlib
 
 import pytest
 from test_adapters import spec_for
 from test_data import corpus_fixture
+from test_domains import domain_fixture
 from typer.testing import CliRunner
 
 from turkish_token_tax.cli import app, run_benchmark
@@ -152,3 +154,71 @@ def test_run_reports_unreadable_corpus_archive_without_a_traceback(tmp_path):
     assert result.exit_code == 1
     assert "not a readable tar.gz" in result.output
     assert "Traceback" not in result.output
+
+
+BENCHMARKS = pathlib.Path(__file__).parents[1] / "benchmarks"
+
+
+def blocked_path(tmp_path, name):
+    """A path whose parent is a regular file, so it can never be written."""
+    blocker = tmp_path / "blocker"
+    blocker.write_text("not a directory", encoding="utf-8")
+    return blocker / name
+
+
+def assert_write_error(result, target):
+    assert result.exit_code == 1, result.output
+    assert f"error: cannot write {target}:" in result.output
+    assert "Traceback" not in result.output
+
+
+def test_chart_reports_an_unwritable_output(tmp_path):
+    out = blocked_path(tmp_path, "chart.svg")
+    report = BENCHMARKS / "flores200-devtest.json"
+    result = CliRunner().invoke(app, ["chart", "--report", str(report), "--out", str(out)])
+    assert_write_error(result, out)
+
+
+def test_drafts_reports_an_unwritable_output(tmp_path):
+    out = blocked_path(tmp_path, "drafts")
+    report = BENCHMARKS / "flores200-devtest.json"
+    result = CliRunner().invoke(app, ["drafts", "--report", str(report), "--out", str(out)])
+    assert_write_error(result, out)
+
+
+def test_domains_reports_an_unwritable_output(tmp_path):
+    spec, cache = domain_fixture(tmp_path, tr="hello\n", en="hello hello\n", pairs=1)
+    domain_lock = tmp_path / "domains.json"
+    domain_lock.write_text(json.dumps([spec]), encoding="utf-8")
+    tokenizer_lock = tmp_path / "tokenizers.json"
+    tokenizer_lock.write_text(json.dumps([spec_for(cache).model_dump()]), encoding="utf-8")
+    out = blocked_path(tmp_path, "domains.json")
+    args = ["domains", "--tokenizer-lock", str(tokenizer_lock), "--domain-lock", str(domain_lock)]
+    result = CliRunner().invoke(app, [*args, "--cache", str(cache), "--out", str(out), "--offline"])
+    assert_write_error(result, out)
+
+
+@pytest.mark.parametrize(
+    ("command", "report"),
+    [("leaderboard", "flores200-devtest.json"), ("domain-table", "domains.json")],
+)
+def test_readme_commands_report_an_unwritable_readme(tmp_path, monkeypatch, command, report):
+    readme = tmp_path / "README.md"
+    readme.write_text(
+        "<!-- leaderboard:start -->\nold\n<!-- leaderboard:end -->\n"
+        "<!-- domains:start -->\nold\n<!-- domains:end -->\n",
+        encoding="utf-8",
+    )
+    original = pathlib.Path.write_text
+
+    def deny_readme(self, *args, **kwargs):
+        if self == readme:
+            raise PermissionError(13, "Permission denied")
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(pathlib.Path, "write_text", deny_readme)
+    result = CliRunner().invoke(
+        app, [command, "--report", str(BENCHMARKS / report), "--readme", str(readme)]
+    )
+    assert_write_error(result, readme)
+    assert "old" in readme.read_text(encoding="utf-8")
