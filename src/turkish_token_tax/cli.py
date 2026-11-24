@@ -82,6 +82,16 @@ def report_errors(report: Path) -> Iterator[None]:
         raise typer.Exit(1) from error
 
 
+@contextmanager
+def write_errors(path: Path) -> Iterator[None]:
+    """Turn a failed write (missing or unwritable location) into a one-line error."""
+    try:
+        yield
+    except OSError as error:
+        typer.echo(f"error: cannot write {path}: {error.strerror or error}", err=True)
+        raise typer.Exit(1) from error
+
+
 def render_report(report: Path, render: Callable[[dict], str]) -> str:
     with report_errors(report):
         return render(json.loads(report.read_text(encoding="utf-8")))
@@ -134,7 +144,8 @@ def refresh_leaderboard(
             raise typer.Exit(1)
         typer.echo(f"{readme} leaderboard matches {report}")
         return
-    readme.write_text(before + begin + "\n" + table + end + after, encoding="utf-8")
+    with write_errors(readme):
+        readme.write_text(before + begin + "\n" + table + end + after, encoding="utf-8")
     typer.echo(f"Updated {readme}")
 
 
@@ -191,12 +202,13 @@ def domains(
         "context_tokens": context_tokens,
         "domains": results,
     }
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(
-        json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    with write_errors(out):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(
+            json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
     typer.echo(f"Measured {len(results)} domains with {len(tokenizers)} tokenizers: {out}")
 
 
@@ -219,7 +231,8 @@ def refresh_domain_table(
             raise typer.Exit(1)
         typer.echo(f"{readme} domain table matches {report}")
         return
-    readme.write_text(updated, encoding="utf-8")
+    with write_errors(readme):
+        readme.write_text(updated, encoding="utf-8")
     typer.echo(f"Updated {readme}")
 
 
@@ -231,7 +244,9 @@ def chart(
     out: Annotated[Path, typer.Option(dir_okay=False)] = Path("benchmarks/flores200-devtest.svg"),
 ):
     """Draw the TR/EN ratio chart (SVG) from a saved report."""
-    out.write_text(render_report(report, chart_svg), encoding="utf-8", newline="\n")
+    svg = render_report(report, chart_svg)
+    with write_errors(out):
+        out.write_text(svg, encoding="utf-8", newline="\n")
     typer.echo(f"Wrote {out}")
 
 
@@ -245,7 +260,8 @@ def drafts(
     """Write local Kaggle dataset and Hugging Face Space drafts. Publishes nothing."""
     with report_errors(report):
         files, manifest = render_drafts(json.loads(report.read_text(encoding="utf-8")))
-    write_drafts(files, manifest, out)
+    with write_errors(out):
+        write_drafts(files, manifest, out)
     typer.echo(f"Wrote {len(manifest['files'])} draft files and MANIFEST.json to {out}")
     typer.echo("Nothing was published; uploads need explicit approval.")
 
