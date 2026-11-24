@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `ttt chart`, `ttt drafts`, `ttt domains`, `ttt leaderboard` and `ttt domain-table` report an unwritable output as a one-line `error: cannot write <path>: <reason>` (exit 1) instead of a traceback (#29).
 - `ttt drafts` reports an unreadable or malformed saved report as a one-line `error:` naming the file (exit 1) instead of a traceback, and writes no draft files in that case (#27).
 - `ttt run` and `ttt domains` report a corpus archive that is not a readable tar.gz/zip, or a locked member missing from it, as a one-line `failed:` error (exit 1) instead of a traceback or a bare `KeyError` (#25).
 - `ttt run` reports a config file with invalid YAML as a one-line `Benchmark failed: ... invalid YAML` error (exit 1) instead of a traceback (#23).
