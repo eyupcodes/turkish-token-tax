@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling==1.32.4"]
+requires = ["hatchling==1.33.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -9,11 +9,11 @@ description = "Reproducible Turkish–English tokenizer efficiency measurements"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["typer==0.27.3", "pydantic==2.14.1", "PyYAML==6.0.3"]
+dependencies = ["typer==0.29.2", "pydantic==2.14.4", "PyYAML==6.0.4"]
 
 [project.optional-dependencies]
 tokenizers = ["tiktoken==0.14.0", "tokenizers==0.23.3"]
-dev = ["pytest==9.1.1", "pytest-cov==7.1.0", "ruff==0.17.1", "build==1.6.1", "mypy==2.4.1", "types-PyYAML==6.0.12.20260408"]
+dev = ["pytest==9.2.0", "pytest-cov==7.1.0", "ruff==0.17.6", "build==1.6.1", "mypy==2.4.1", "types-PyYAML==6.0.12.20261122"]
 
 [project.scripts]
 ttt = "turkish_token_tax.cli:app"
